@@ -55,13 +55,16 @@ export class DataStoreValue extends DataStoreVersion {
 			size: +res.headers.get('content-length'),
 		})
 		/** The parsed value associated with the key */
-		this.value = res.json
+		this._value = res.json
 		/** The base64-encoded MD5 hash of the expected value */
 		this.hash = Buffer.from(res.headers.get('content-md5'), 'base64')
 		/** The attributes associated with this key */
 		this.attributes = JSON.parse(res.headers.get('roblox-object-attributes') ?? 'null')
 		/** The user ids associated with this key */
 		this.userIds = JSON.parse(res.headers.get('roblox-object-userids') ?? 'null')
+	}
+	get value() {
+		return this._value
 	}
 	set value(value) {
 		if (value == null) {
@@ -70,6 +73,7 @@ export class DataStoreValue extends DataStoreVersion {
 		const stringValue = JSON.stringify(value)
 		this.hash = createHash('md5').update(stringValue).digest('base64')
 		this.size = stringValue.length
+		this._value = value
 	}
 	/** The users associated with this key in object form */
 	get users() {
@@ -84,7 +88,7 @@ export class DataStoreValue extends DataStoreVersion {
 	}
 	/** Updates the DataStore to reflect this object's values */
 	async update(updateThisObject = true) {
-		const version = await this.datastore.set(this.key, this.value, this.attributes, this.userIds)
+		const version = await this.datastore.set(this.key, this.value, this.userIds, this.attributes)
 		if (updateThisObject) {
 			this.version = version.version
 			this.versionCreated = version.versionCreated
@@ -167,7 +171,7 @@ export class DataStore extends PlaceAPIManager {
 		res.headers.set('content-md5', hash)
 		if (attributes) res.headers.set('roblox-object-attributes', attributes)
 		if (userIds) res.headers.set('roblox-object-userids', userIds)
-		return DataStoreValue(this, key, res)
+		return new DataStoreValue(this, key, res)
 	}
 
 	/**
