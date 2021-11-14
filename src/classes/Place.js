@@ -102,15 +102,19 @@ export class PlacePartial extends AssetPartial {
 		const headers = new Headers()
 		headers.set('content-type', 'application/x-www-form-urlencoded')
 		headers.set('Roblox-Place-Id', this.id)
-		const response = await this.client.request.datastores(`/persistence/getV2?type=${type}`, {
-			headers,
-			method: 'POST',
-			body: queries.map(query => toForm(query)).join('')
-		})
-		if (!response.ok) {
-			return Promise.reject(`${response.status} ${await response.text()}`)
+		const results = []
+		for (let i = 0; i < queries.length; i += 100) {
+			const response = await this.client.request.datastores(`/persistence/getV2?type=${type}`, {
+				headers,
+				method: 'POST',
+				body: queries.slice(i, i + 100).map((query,i) => toForm(query,i)).join('')
+			})
+			if (!response.ok) {
+				return Promise.reject(`${response.status} ${await response.text()}`)
+			}
+			results.push(...response.json.data)
 		}
-		return response.json.data.map(value => {return {key: {key: value.Key.Target, scope: value.Key.Scope, name: value.Key.Key}, value: JSON.parse(value.Value)}})
+		return results.map(value => {return {key: {key: value.Key.Target, scope: value.Key.Scope, name: value.Key.Key}, value: JSON.parse(value.Value)}})
 	}
 
 	/**
