@@ -156,6 +156,31 @@ export class PlacePartial extends AssetPartial {
 	getLegacyDataStore(name, scope = 'global') {
 		return new LegacyDataStore(name, scope, this, this.client)
 	}
+
+	/**
+	 * Gets the developer-configured settings for the place. You must be a developer of the place to use this.
+	 * @returns 
+	 */
+	async getSettings() {
+		const res = await this.client.request.develop(`/v2/places/${this.id}`)
+		this.universeId = res.json.universeId
+		this.name = res.json.name
+		return res.json
+	}
+
+	/**
+	 * Updates the developer-configured settings for the place. You must be a developer of the place to use this.
+	 * @returns 
+	 */
+	async patchSettings(settings) {
+		const res = await this.client.request.develop(`/v2/places/${this.id}`, {
+			method: 'PATCH',
+			body: settings
+		})
+		this.universeId = res.json.universeId
+		this.name = res.json.name
+		return res.json
+	}
 }
 
 export class PlaceAsset extends PlacePartial {

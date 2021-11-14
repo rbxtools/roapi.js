@@ -399,3 +399,33 @@ export const enum FFlagValueType {
 	string = 'string',
 	int = 'int',
 }
+
+export const enum SocialSlotType {
+	/** Fill each server as full as possible */
+	Empty = 'Empty',
+	/** Roblox automatically decides the amount of slots to reserve */
+	Automatic = 'Automatic',
+	/** The developer decides the amouunt of slots to reserve */
+	Custom = 'Custom',
+}
+
+export const enum UniverseAvatarType {
+	MorphToR6 = 'MorphToR6',
+	MorphToR15 = 'MorphToR15',
+	PlayerChoice = 'PlayerChoice'
+}
+
+export const enum UniverseAnimationType {
+	Standard = 'Standard',
+	PlayerChoice = 'PlayerChoice'
+}
+
+export const enum CollisionType {
+	OuterBox = 'OuterBox',
+	InnerBox = 'InnerBox',
+}
+
+export const enum JointPositioningType {
+	Standard = 'Standard',
+	ArtistIntent = 'ArtistIntent'
+}

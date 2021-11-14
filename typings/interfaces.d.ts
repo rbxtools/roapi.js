@@ -1,7 +1,7 @@
 import { IncomingHttpHeaders } from "http";
 import { Writable } from "stream";
 import { InspectOptions } from "util";
-import { FilterBehavior, FilterInclusion, FilterType, HTTPMethod, MutualFilterBehavior, Privacy, RedirectFilterBehavior, RequestLoggingMode, RequestType, SecurityType, SortOrder } from "./enums";
+import { CollisionType, DeviceType, FilterBehavior, FilterInclusion, FilterType, HTTPMethod, JointPositioningType, MutualFilterBehavior, Privacy, RedirectFilterBehavior, RequestLoggingMode, RequestType, SecurityType, SocialSlotType, SortOrder, UniverseAnimationType, UniverseAvatarType } from "./enums";
 import {AvatarAssetPartial, AssetPartial, Asset, Emote, PageFunc, User, UserResolvable, BaseRequested} from "./index"
 
 export interface WornOutfit {
@@ -679,4 +679,68 @@ export interface BinaryVersion {
 	boostrapperVersion: string
 	nextVersion?: string
 	nextFolderName?: string
+}
+
+export interface PlaceSettingsPatch {
+	name?: string
+	description?: string
+	maxPlayerCount?: number
+	socialSlotType?: SocialSlotType
+	customSocialSlotsCount?: number
+	allowCopying?: boolean
+}
+
+export interface PlaceSettings {
+	maxPlayerCount: number
+	socialSlotType: SocialSlotType
+	customSocialSlotsCount: number
+	allowCopying: boolean
+	currentSavedVersion: number
+	id: number
+	universeId: number
+	name: string
+	description: string
+	isRootPlace: boolean
+}
+
+export interface UniverseSettingsV1 {
+	id: number
+	name: string
+	universeAvatarType: UniverseAvatarType
+	universeAnimationType: UniverseAnimationType
+	universeCollisionType: CollisionType
+	universeJointPositioningType: JointPositioningType
+	/** @deprecated Exclusive to V1 */
+	universeScaleType?: 'AllScales'
+	/** @deprecated Exclusive to V1 */
+	universeBodyType?: 'Standard'
+	isArchived: boolean
+	isFriendsOnly: boolean
+	genre: string
+	playableDevices: DeviceType[]
+	isForSale: boolean
+	price: number
+}
+
+export interface UniverseSettings extends UniverseSettingsV1 {
+	allowPrivateServers: boolean
+	privateServerPrice?: number
+	optInRegions: any[]
+	optOutRegions?: any[]
+	description: string
+	universeAvatarAssetOverrides: AvatarAssetOverride[]
+	universeAvatarMinScales: AvatarScales
+	universeAvatarMaxScales: AvatarScales
+	studioAccessToApisAllowed: boolean
+	permissions: {
+		IsThirdPartyTeleportAllowed: boolean
+		IsThirdPartyAssetAllowed: boolean
+		IsThirdPartyPurchaseAllowed: boolean
+	}
+}
+
+export interface AvatarAssetOverride {
+	assetID: number
+	assetTypeID: number
+	isPlayerChoice: boolean
 }

@@ -400,6 +400,9 @@ export class PlacePartial extends AssetPartial {
 	getOrderedDataStore(name: string, scope?: string): OrderedDataStore
 	globalDataStore: GlobalDataStore
 	getLegacyDataStore(name: string, scope?: string): LegacyDataStore
+
+	getSettings(): Promise<Interface.PlaceSettings>
+	patchSettings(settings: Interface.PlaceSettingsPatch): Promise<Interface.PlaceSettings>
 }
 
 export class PlaceAsset extends PlacePartial {
@@ -637,6 +640,9 @@ export class UniversePartial extends AssetLike {
 
 	fetchDetails(doUpdate?: false): Promise<Universe>
 	fetchRootPlace(doUpdate?: false): Promise<Place>
+
+	fetchSettings(): Interface.UniverseSettingsV1
+	patchSettings(settings: Partial<Interface.UniverseSettings>): Interface.UniverseSettings
 }
 
 export class Universe extends UniversePartial {
@@ -653,7 +659,7 @@ export class Universe extends UniversePartial {
 	updated: Date
 	studioAccessToApis: boolean
 	privateServersEnabled: boolean
-	universeAvatarType: 'MorphToR6' | 'MorphToR15' | 'PlayerChoice'
+	universeAvatarType: Enum.UniverseAvatarType
 	genre: string
 	isAllGenre: boolean
 	/** @deprecated NYI to Roblox API - currently always null */

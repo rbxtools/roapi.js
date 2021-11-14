@@ -38,6 +38,24 @@ export class UniversePartial extends AssetLike {
 		}
 		return this.client.places.fetch(this.rootPlaceId, doUpdate)
 	}
+
+	fetchSettings() {
+		const res = await this.client.request.develop(`/v1/universes/${this.id}/configuration`)
+		this.name = res.json.name
+		this.universeAvatarType = res.json.universeAvatarType
+		return res.json
+	}
+
+	patchSettings(settings) {
+		const res = await this.client.request.develop(`/v2/universes/${this.id}/configuration`, {
+			method: 'PATCH',
+			body: settings
+		})
+		this.name = res.json.name
+		this.description = res.json.description
+		this.universeAvatarType = res.json.universeAvatarType
+		return res.json
+	}
 }
 
 export class Universe extends UniversePartial {
