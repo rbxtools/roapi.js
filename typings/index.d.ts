@@ -1157,6 +1157,7 @@ export class DataStore extends PlaceAPIManager {
 	increment(key: string, amount: number, userIds?: UserResolvable[], attributes?: Interface.Dictionary): Promise<DataStoreValue>
 	listVersions(key: string, startDate?: Date, endDate?: Date, maxPageSize?: number, sortOrder?: Enum.SortOrderLong): Promise<Page<DataStoreVersion,Interface.DataStoreVersionPageData>>
 	listKeys(prefix?: string, maxPageSize?: number): Promise<Page<string>>
+	getBulk(keys: string[]): Promise<Map<string, any>>
 }
 
 export class LegacyDataStore extends PlaceAPIManager {
@@ -1171,6 +1172,7 @@ export class LegacyDataStore extends PlaceAPIManager {
 	remove(key: string): Promise<any>
 	increment(key: string, amount: number): Promise<number>
 	update(key: string, callback: (value: any) => any): Promise<any>
+	getBulk(keys: string[]): Promise<Map<string, any>>
 }
 
 export class OrderedDataStore extends LegacyDataStore {
