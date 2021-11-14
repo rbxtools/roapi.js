@@ -188,7 +188,6 @@ export function logger(request, {useConsoleColors = true, include: optInclude = 
 		}
 		const responseHeaderEntries = Object.entries(filteredResponseHeaders)
 	
-		console.log(request.body, responseHeaderEntries.length)
 		if ((include.responseBody && request.body) || (include.responseHeaders && responseHeaderEntries.length > 0)) {
 			output.groupCollapsed()
 			log(
