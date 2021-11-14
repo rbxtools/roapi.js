@@ -255,7 +255,7 @@ export function logger(request, {useConsoleColors = true, include: optInclude = 
 			output.groupCollapsed()
 			log(
 				colors.bold + colors.underline + 'STACK TRACE'.padEnd(25) + '_' + colors.reset + ' \n' +
-				stackTrace.splice(4).join('\n')
+				stackTrace.slice(4).join('\n')
 			)
 			output.groupEnd()
 		}

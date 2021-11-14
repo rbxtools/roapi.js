@@ -55,7 +55,7 @@ export class FFlag extends Base {
 		}
 		
 		let values = options.value.split(';')
-		this.filter = values.splice(1)
+		this.filter = values.slice(1)
 		const fromName = Object.entries(filterTypes).find(kv => this.name.endsWith(kv[0]))
 		this.filterType = fromName ? fromName[1] : (this.filter.length > 0 ? 'unknown' : 'none')
 		let value = values[0]
