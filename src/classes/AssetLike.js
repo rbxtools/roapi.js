@@ -14,7 +14,7 @@ export class AssetLike extends Base {
 		 * @type {number}
 		 * @readonly
 		 */
-		Object.defineProperty(this, 'id', {value: assetInfo.id || assetInfo.assetId || assetInfo.targetId})
+		Object.defineProperty(this, 'id', {value: assetInfo.id || assetInfo.assetId || assetInfo.targetId || assetInfo.userId})
 
 		this._patch(assetInfo)
 	}
