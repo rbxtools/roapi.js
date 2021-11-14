@@ -184,6 +184,10 @@ export class User extends AssetLike {
 	createGroupChat(otherUsers: UserResolvable | UserResolvable[], name?: string): Promise<GroupConversation>
 
 	isGroupChatMember(): this is GroupChatMember
+
+	fetchAlias(): Promise<string>
+	setAlias(alias: string): Promise<void>
+	setPendingAlias(alias: string): Promise<void>
 }
 
 type UserDetailsResponse = Interface.UserDetails & {created: Date | string}
@@ -837,6 +841,8 @@ export class Request extends BaseRequest {
 
 export class UserManager extends MultiFetchableManager<User, number, UserResolvable> {
 	isValidUsername(username: string, context: 'Signup'|'Unknown'|'UsernameChange', birthday?: Date): Promise<Interface.ValidUsername>
+	batchFetchAlias(userId: number): Promise<string>
+	batchFetchALias(userIds: number[]): Promise<Map<number, string>>
 }
 
 export class UniverseManager extends MultiFetchableManager<UniversePartial, number, UniverseResolvable, Universe> {}
