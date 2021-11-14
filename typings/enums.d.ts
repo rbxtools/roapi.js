@@ -356,6 +356,13 @@ export const enum FFlagFilterType {
 	none = 'none'
 }
 
+export const enum BinaryType {
+	WindowsPlayer = 'WindowsPlayer', 
+	WindowsStudio = 'WindowsStudio', 
+	MacPlayer = 'MacPlayer',
+	MacStudio = 'MacStudio'
+}
+
 export const enum FFlagChannel {
 	PCDesktopClient = 'PCDesktopClient',
 	MacDesktopClient = 'MacDesktopClient',

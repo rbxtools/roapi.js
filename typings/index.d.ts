@@ -1065,8 +1065,8 @@ export class GameLink extends MessageLink {
 export class BaseManager<Class, Key=number, Resolvable=GenericResolvable> extends Base {
 	cache: Cache<Class>
 	resolveId(resolvable: Resolvable): Key
-	get(id: Key, data?: Interface.Dictionary): Class
-	get(id: Key, data: Interface.Dictionary, overrideClass: Constructor<Class>): typeof overrideClass.prototype
+	get?(id: Key, data?: Interface.Dictionary): Class
+	get?(id: Key, data: Interface.Dictionary, overrideClass: Constructor<Class>): typeof overrideClass.prototype
 }
 
 export class FetchableManager<Class, Key=number, Resolvable=GenericResolvable, FetchClass=Class> extends BaseManager<Class, Key, Resolvable> {
@@ -1193,6 +1193,48 @@ export class GlobalDataStore extends LegacyDataStore {
 	scopeEncoded: 'u'
 }
 
+export class FFlagManager extends Base {
+	windows: FFlagChannel
+	mac: FFlagChannel
+	windowsStudioBootstrapper: FFlagChannel
+	macStudioBootstrapper: FFlagChannel
+	windowsBootstrapper: FFlagChannel
+	macBootstrapper: FFlagChannel
+	xbox: FFlagChannel
+	android: FFlagChannel
+	ios: FFlagChannel
+	studio: FFlagChannel
+	getUserChannel(): Promise<string>
+	getBinaryVersion(binaryType?: Enum.BinaryType, channelName?: 'LIVE' | string): Promise<Interface.BinaryVersion>
+}
+
+export class FFlagChannel extends MultiFetchableManager<FFlag, string, FFlagResolvable> {
+	cache: Cache<FFlag>
+	channel: Enum.FFlagChannel
+	get: undefined
+	from(fullName: string, value: string): FFlag
+	fetch(fullFlagName: string, doUpdate?: boolean, light?: boolean): Promise<FFlag>
+	fetch(fullFlagNames: string[], doUpdate?: boolean, light?: boolean): Promise<Map<string, FFlag>>
+	fetchAllRaw(): Promise<{[flagName: string]: string}>
+	fetchAll(): Promise<Map<string, FFlag>>
+}
+
+export class FFlag extends Base {
+	fullName: string
+	name: string
+	channel: FFlagChannel
+	dynamic: boolean
+	valueType: Enum.FFlagValueType
+	prefix: Enum.FFlagPrefix
+	shortPrefix: Enum.FFlagShortPrefix
+	_patch(options: Interface.Dictionary): FFlag
+	filter: string[]
+	filterType: Enum.FFlagFilterType
+	placeFilter: PlacePartial[]
+	fetchPlaces(doUpdate?: boolean, force?: boolean): Promise<Place[]>
+	toString(): string
+}
+
 export class GamepassPartial extends AssetLike {}
 export class Gamepass extends GamepassPartial {}
 
@@ -1205,6 +1247,7 @@ export type PrivateServerResolvable = number | string | PrivateServerPartial
 export type ServerInstanceResolvable = string | PartialServerInstance
 export type BundleResolvable = number | string | BundlePartial
 export type SponsorResolvable = number | string | SponsorshipPartial
+export type FFlagResolvable = string | FFlag
 export type GenericResolvable = number | string | AssetLike
 export type FileResolvable = string | Buffer | Stream | FileHandle 
 

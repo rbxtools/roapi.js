@@ -612,6 +612,7 @@ export interface WeakCaches {
 	privateServers?: { partial?: WCValue, full?: WCValue, rich?: WCValue } | WCValue,
 	bundles?: { partial?: WCValue, full?: WCValue } | WCValue,
 	sponsorships?: { partial?: WCValue, full?: WCValue } | WCValue,
+	fflags?: { full?: WCValue } | WCValue,
 	servers?: { 
 		partial?: WCValue, 
 		full?: WCValue, 
@@ -670,4 +671,12 @@ export interface DataStoreBulkQuery {
 export interface DataStoreBulkResponse {
 	key: DataStoreBulkQuery
 	value: any
+}
+
+export interface BinaryVersion {
+	version: string
+	folderName: string
+	boostrapperVersion: string
+	nextVersion?: string
+	nextFolderName?: string
 }

@@ -80,7 +80,7 @@ export class FFlagChannel extends MultiFetchableManager {
 			return id.toString()
 		}
 	}
-	get(fullName, value) {
+	from(fullName, value) {
 		if (value == undefined) {
 			return this.cache.rawget(fullName)
 		}
@@ -104,7 +104,7 @@ export class FFlagChannel extends MultiFetchableManager {
 			const rawFlags = await this.fetchAllRaw()
 			for (let flag of fullFlagNames) {
 				if (doUpdate || !flags.has(flag)) {
-					flags.set(flag, this.get(flag, rawFlags[flag]))
+					flags.set(flag, this.from(flag, rawFlags[flag]))
 				}
 			}
 		} else {
