@@ -84,4 +84,14 @@ export class LegacyDataStore extends PlaceAPIManager {
 		await this.set(key, newValue)
 		return newValue
 	}
+
+	/**
+	 * Gets values from this DataStore in bulk.
+	 * @param {string[]} keys 
+	 * @returns {Map<string,any>}
+	 */
+	async bulkGet(keys) {
+		const values = await this.place.bulkDataStoreGet(keys.map(key  => {return {name: this.name, scope: this.scope, key}}), this.type)
+		return new Map(values.map(obj => [obj.key.key, obj.value]))
+	}
 }

@@ -49,9 +49,9 @@ export class DataStoreValue extends DataStoreVersion {
 	 */
 	constructor(datastore, key, res) {
 		super(datastore, key, {
-			version: res.headers.get('roblox-object-version-id'),
-			keyCreated: res.headers.get('roblox-object-created-time'),
-			versionCreated: res.headers.get('roblox-object-version-created-time'),
+			version: res.headers.get('roblox-object-version-id') ?? res.version,
+			keyCreated: res.headers.get('roblox-object-created-time') ?? res.json.objectCreatedTime ?? res.json.createdTime,
+			versionCreated: res.headers.get('roblox-object-version-created-time') ?? res.json.versionCreatedTime ?? res.json.createdTime,
 			size: +res.headers.get('content-length'),
 		})
 		/** The parsed value associated with the key */
@@ -227,7 +227,7 @@ export class DataStore extends PlaceAPIManager {
 			mapFunc: res => new DataStoreVersion(this, key, res),
 			headers: this.headers,
 			canDecodeCursors: true
-		})
+		}, this.client)
 	}
 
 	/**
@@ -236,13 +236,24 @@ export class DataStore extends PlaceAPIManager {
 	 * @param {number} [maxPageSize] The *maximum* number of keys to return per page. This is not guaranteed to be the number of keys returned.
 	 * @returns {Promise<Page<string[]>>}
 	 */
-	async listKeys(prefix, maxPageSize = 50) {
-		return await Page.first(`https://gamepersistence.roblox.com/v2/persistence/${await this.getUniverseId()}/datastores/objects/object/versions?datastore=${this.nameEncoded}&prefix=${this.scopeEncoded}${encodeURIComponent(prefix)}&maxItemsToReturn=${maxPageSize ?? ''}`, {
+	async listKeys(prefix = '', maxPageSize = 50) {
+		return await Page.first(`https://gamepersistence.roblox.com/v2/persistence/${await this.getUniverseId()}/datastores/objects?datastore=${this.nameEncoded}&prefix=${this.scopeEncoded}${encodeURIComponent(prefix)}&maxItemsToReturn=${maxPageSize ?? ''}`, {
 			cursorName: 'exclusiveStartKey',
 			nextPageIndex: 'lastReturnedKey',
 			dataIndex: 'keys',
 			headers: this.headers,
-			canDecodeCursors: true
-		})
+			canDecodeCursors: true,
+			mapFunc: key => (this.scope != '' && key.startsWith(`${this.scope}/`)) ? key.replace(`${this.scope}/`, '') : key
+		}, this.client)
+	}
+
+	/**
+	 * Gets values from this DataStore in bulk.
+	 * @param {string[]} keys 
+	 * @returns {Map<string,any>}
+	 */
+	async bulkGet(keys) {
+		const values = await this.place.bulkDataStoreGet(keys.map(key  => {return {name: this.name, scope: this.scope, key}}), this.type)
+		return new Map(values.map(obj => [obj.key.key, obj.value]))
 	}
 }
