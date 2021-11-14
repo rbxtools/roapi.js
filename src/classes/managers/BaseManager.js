@@ -3,10 +3,9 @@ import { Base } from "../Base.js";
 
 /**
  * @template Class,Key,Resolvable
+ * @prop {import('../Cache.js').Cache} cache
  */
 export class BaseManager extends Base {
-	/** @type {import('../Cache.js').Cache} */ cache;
-
 	/**
 	 * @param {Resolvable} resolvable 
 	 * @returns {Key}
@@ -35,15 +34,13 @@ export class BaseManager extends Base {
 /**
  * @template Class,Key,Resolvable,FetchClass
  * @extends {BaseManager<Class,Key,Resolvable>}
+ * @prop {(id: Resolvable, forceUpdate: boolean?) => Promise<FetchClass>} fetch
  */
-export class FetchableManager extends BaseManager {
-	/** @type {(id: Resolvable, forceUpdate: boolean?) => Promise<FetchClass>} */ fetch;
-}
+export class FetchableManager extends BaseManager {}
 
 /**
  * @template Class,Key,Resolvable,FetchClass
  * @extends {FetchableManager<Class,Key,Resolvable,FetchClass>}
+ * @prop {(id: Resolvable|Resolvable[], forceUpdate: boolean?) => Promise<FetchClass | Map<Key, FetchClass>>} fetch
  */
-export class MultiFetchableManager extends FetchableManager {
-	/** @type {(id: Resolvable|Resolvable[], forceUpdate: boolean?) => Promise<FetchClass | Map<Key, FetchClass>>} */ fetch;
-}
+export class MultiFetchableManager extends FetchableManager {}
