@@ -20,8 +20,8 @@ export class UniverseSponsorManager extends UniverseAPIManager {
 	fetchList(archived = false) {
 		return Page.first(
 			`https://adconfiguration.roblox.com/v2/sponsored-games?universeId=${this.universeId}&includeReportingStats=true&isArchived=${archived}`, 
-			undefined, this.client, 
-			sponsor => this.client.sponsorships.get(sponsor.id, sponsor, Sponsorship)
+			{ mapFunc: sponsor => this.client.sponsorships.get(sponsor.id, sponsor, Sponsorship) }, 
+			this.client
 		)
 	}
 
