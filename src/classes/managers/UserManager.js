@@ -79,7 +79,7 @@ export class UserManager extends MultiFetchableManager {
 		const aliases = new Map
 		if (userIds.length > 0) {
 			const res = await this.client.request.contacts(`/v1/user/get-tags`, {method: 'POST', body: {targetUserIds: userIds}})
-			for (let aliasData of res.json.data) {
+			for (let aliasData of res.json) {
 				aliases.set(aliasData.targetUserId, aliasData.targetUserTag)
 			}
 		}
