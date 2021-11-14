@@ -216,8 +216,8 @@ export function logger(request, {useConsoleColors = true, include: optInclude = 
 				let responseBody = request.json
 				if (!showHTML && contentType == 'text/html') {
 					responseBody = colors.magenta + `<${contentSize} KB HTML page>` + colors.reset
-				} else if (contentType == 'application/octet-stream') {
-					responseBody = colors.magenta + `<${contentSize} KB binary file>` + colors.reset
+				// } else if (contentType == 'application/octet-stream') {
+				// 	responseBody = colors.magenta + `<${contentSize} KB binary file>` + colors.reset
 				} else if (contentType.startsWith('image/')) {
 					responseBody = colors.magenta + `<${contentSize} KB image>` + colors.reset
 				} else if (contentType.startsWith('video/')) {
