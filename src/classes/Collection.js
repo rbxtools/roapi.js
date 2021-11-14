@@ -27,7 +27,7 @@ export class Collection extends Base {
 	 * @param {import('./Client').Client} client 
 	 * @param {CollectionOptions} options 
 	 */
-	constructor(url, body, client, options) {
+	constructor(url, options, body, client) {
 		super(client)
 		this.cursorName = options.cursorName ?? 'cursor'
 		this.nextPageFunc = options.nextPageFunc
@@ -52,8 +52,15 @@ export class Collection extends Base {
 		this.nextPageCursor = this.nextPageFunc(this)
 		this.previousPageCursor = this.previousPageFunc(this)
 
-		this.hasNextPage = this.nextPageCursor != null
-		this.hasPreviousPage = this.previousPageCursor != null
+		this.hasNextPage = !!this.nextPageCursor
+		this.hasPreviousPage = !!this.previousPageCursor
+	}
+
+	get nextPageCursorEncoded() {
+		return encodeURIComponent(this.nextPageCursor)
+	}
+	get prevPageCursorEncoded() {
+		return encodeURIComponent(this.previousPageCursor)
 	}
 
 	/**
@@ -66,14 +73,14 @@ export class Collection extends Base {
 		}
 		const cursorAppend = `${this.url.includes('?') ? '&' : '?'}${this.cursorName}=${cursor}`
 		const res = await this.client.request(this.url + cursorAppend, this.params)
-		return new (Object.getPrototypeOf(this).constructor)(this.url, res.json, this.client, {...this.options, currentCursor: cursor})
+		return new (Object.getPrototypeOf(this).constructor)(this.url, {...this.options, currentCursor: cursor}, res.json, this.client)
 	}
 
 	nextPage() {
-		return this.fromCursor(this.nextPageCursor)
+		return this.fromCursor(this.nextPageCursorEncoded)
 	}
 	prevPage() {
-		return this.fromCursor(this.previousPageCursor)
+		return this.fromCursor(this.prevPageCursorEncoded)
 	}
 
 	/**
@@ -98,7 +105,7 @@ export class Collection extends Base {
 	 * @returns {Promise<ModContents[]>}
 	 */
 	async fetchAllPageData() {
-		if (!Array.isArray(this.body)) {
+		if (!Array.isArray(this.contents)) {
 			throw new TypeError('This page does not return an array.')
 		}
 		const allPages = await this.fetchAllPages()
@@ -140,6 +147,6 @@ export class Collection extends Base {
 	 */
 	static async first(url, client, options) {
 		const res = await client.request(url)
-		return new this(url, res.json, client, options)
+		return new this(url, options, res.json, client)
 	}
 }

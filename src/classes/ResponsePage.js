@@ -38,27 +38,22 @@ export class Page extends Collection {
 	 */
 	constructor(url, params, body, client) {
 		const nextPageIndex = params?.nextPageIndex ?? 'nextPageCursor'
-		const previousPageIndex = params?.previousPageIndex ?? 'previousPageCursor'
+		const previousPageIndex = params?.prevPageIndex ?? 'previousPageCursor'
 		const dataIndex = params?.dataIndex ?? 'data'
 		const mapFunc = params.mapFunc ?? (x => x)
 
-		super(url, body, client, {
+		super(url, {
 			nextPageFunc: coll => coll.body[nextPageIndex],
 			previousPageFunc: coll => coll.body[previousPageIndex],
-			modFunc: value => value,
-			mapFunc: params.mapFunc,
+			modFunc: value => value[dataIndex],
+			mapFunc,
 			currentCursor: '',
 			cursorName: params?.cursorName ?? 'cursor',
 			requestParams: params
-		})
+		}, body, client)
 		this.canDecodeCursors = params.canDecodeCursors ?? false
 
-		if (Array.isArray(body[dataIndex])) {
-			/** @type {ContentType} */
-			this.contents = body[dataIndex].map(mapFunc)
-		} else {
-			this.contents = body[dataIndex]
-		}
+		this.options = params
 
 		if (this.canDecodeCursors) {
 			if (this.nextPageCursor) {
@@ -68,13 +63,6 @@ export class Page extends Collection {
 				this.previousPageInfo = getCursorInfo(this.previousPageCursor)
 			}
 		}
-	}
-
-	nextPage() {
-		return this.fromCursor(this.nextPageCursor)
-	}
-	prevPage() {
-		return this.fromCursor(this.previousPageCursor)
 	}
 
 	async searchAllArrayPages(findFunc) {
