@@ -79,7 +79,9 @@ export class Cache extends Base {
 		this.classPriority = classPriority
 		this.globalWeak = globalWeak
 
-		setInterval(this.clearWeak, 60_000)
+		setInterval(() => {
+			this.clearWeak()
+		}, 60_000)
 	}
 	/**
 	 * Gets a member of the cache **without** creating a new entry if it doesn't exist.
@@ -95,7 +97,7 @@ export class Cache extends Base {
 		if (value instanceof WeakRef) {
 			value = value.deref()
 			if (value == null) {
-				delete this[id]
+				this.values.delete(id)
 			}
 		} else if (!skipWeakAfter && this.weakTime.has(value)) {
 			this.weakAfter.set(value, Date.now() + this.weakAfter.get(value))
@@ -158,7 +160,7 @@ export class Cache extends Base {
 	clearWeak() {
 		for (let [index, value] of this.values.entries()) {
 			if (value instanceof WeakRef && !value.deref()) {
-				delete this[index]
+				this.values.delete(index)
 			} else if (this.weakAfter.has(value) && Date.now() > this.weakAfter.get(value)) {
 				this.markWeak(index)
 			}
