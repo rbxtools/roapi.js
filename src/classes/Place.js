@@ -9,12 +9,6 @@ import { OrderedDataStore } from "./datastores/OrderedDataStore.js"
 import { Page } from "./ResponsePage.js"
 import { ServerInstance } from "./ServerInstance.js"
 
-function toForm(query, index) {
-	query.name ??= query.datastore?.name
-	query.scope ??= query.datastore?.scope ?? 'global'
-	return `&qkeys[${index}].scope=${encodeURIComponent(query.scope)}&qkeys[${index}].key=${encodeURIComponent(query.name)}&qkeys[${index}].target=${encodeURIComponent(query.key)}`
-}
-
 export class PlacePartial extends AssetPartial {
 	_patch(data) {
 		this.universeId = data.universeId ?? data.universe?.id ?? data.gameId ?? this.universeId
@@ -94,27 +88,36 @@ export class PlacePartial extends AssetPartial {
 
 	/**
 	 * Bulk queries values from multiple DataStores, keys, and scopes
-	 * @param {{name: string, key: string, scope: string?}[]} queries 
+	 * @param {{name: string, key?: string, scope?: string}[]} queries 
 	 * @param {"standard"|"sorted"} [type='standard']
 	 * @returns {Promise<{key:{name: string, key: string, scope: string}, value: (number|string|Object)}[]>}
 	 */
 	async bulkDataStoreGet(queries, type = 'standard') {
-		const headers = new Headers()
-		headers.set('content-type', 'application/x-www-form-urlencoded')
-		headers.set('Roblox-Place-Id', this.id)
 		const results = []
 		for (let i = 0; i < queries.length; i += 100) {
 			const response = await this.client.request.datastores(`/persistence/getV2?type=${type}`, {
-				headers,
+				headers: { 'Roblox-Place-Id': this.id },
 				method: 'POST',
-				body: queries.slice(i, i + 100).map((query,i) => toForm(query,i)).join('')
+				body: queries.slice(i, i + 100).map(query => {
+					return {
+						scope: query.scope ?? (query.key ? 'global' : 'u'),
+						target: query.key,
+						key: query.name
+					}
+				})
 			})
-			if (!response.ok) {
-				return Promise.reject(`${response.status} ${await response.text()}`)
-			}
-			results.push(...response.json.data)
+			results.concat(response.json.data)
 		}
-		return results.map(value => {return {key: {key: value.Key.Target, scope: value.Key.Scope, name: value.Key.Key}, value: JSON.parse(value.Value)}})
+		return results.map(value => {
+			return {
+				key: {
+					key: value.Key.Target, 
+					scope: value.Key.Scope, 
+					name: value.Key.Key
+				}, 
+				value: JSON.parse(value.Value)
+			}}
+		)
 	}
 
 	/**

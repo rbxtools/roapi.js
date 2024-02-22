@@ -44,6 +44,13 @@ export class OutfitPartial extends AssetLike {
 		delete worn.invalidAssetIds
 		return worn
 	}
+
+	/**
+	 * Fetches the thumbnail for this outfit. Please use client.outfits.fetchThumbnails if you need more than one.
+	 */
+	fetchThumbnailUrl(size = '420x420') {
+		return this.client.outfits.fetchThumbnails(this.id, size)
+	}
 }
 
 export class Outfit extends OutfitPartial {

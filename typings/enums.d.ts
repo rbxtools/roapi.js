@@ -17,7 +17,7 @@ export const enum Privacy {
 	/** Only friends, people you follow, and people who follow you can view this */
 	FriendsFollowingAndFollowers = 'FriendsFollowingAndFollowers',
 	/** Anyone can view this */
-	AllUsers = 'AllUsers'
+	AllUsers = 'AllUsers',
 }
 
 export const enum SortOrder {
@@ -428,4 +428,16 @@ export const enum CollisionType {
 export const enum JointPositioningType {
 	Standard = 'Standard',
 	ArtistIntent = 'ArtistIntent'
+}
+
+export const enum ContentRestrictionLevel {
+	Child = 'Child',
+	PreTeen = 'PreTeen',
+	Teen = 'Teen',
+	NoRestrictions = 'NoRestrictions'
+}
+
+export const enum OutfitThumbnailSize {
+	'420x420' = '420x420',
+	'150x150' = '150x150',
 }

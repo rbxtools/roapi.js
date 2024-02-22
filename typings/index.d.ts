@@ -262,6 +262,7 @@ export class Outfit extends OutfitPartial {
 	getDetails(): Promise<Outfit>
 	update(contents?: Interface.OutfitInterface): Promise<void>
 	fetchAssets(doUpdate?: false): Promise<Asset[]>
+	fetchThumbnailUrl(size?: Enum.OutfitThumbnailSize): Promise<string>
 }
 
 export type Constructor<Type> = {
@@ -413,9 +414,7 @@ export class Place extends PlaceAsset {
 	
 }
 
-export class PrivacySettings {
-	constructor(client: Client)
-
+export class PrivacySettings extends UserAPIManagerAuthenticated {
 	private get(endpoint: string, index: string): Promise<any>
 
 	private set(endpoint: string, index: string, value: any, method: Enum.HTTPMethod): Promise<any>
@@ -474,6 +473,12 @@ export class PrivacySettings {
 	 * Updates the authenticated user's phone discovery settings. PIN must be unlocked.
 	 */
 	setPrivateMessagePrivacy(privacy: Enum.Privacy): Promise<void>
+
+	getVisibility(): Promise<number>
+	setVisibility(visibility: number): Promise<void>
+
+	getContentRestrictions(): Promise<Enum.ContentRestrictionLevel>
+	setContentRestrictions(restrictionLevel: Enum.ContentRestrictionLevel): Promise<void>
 }
 
 export class BaseRequested {
@@ -848,10 +853,15 @@ export class Request extends BaseRequest {
 export class UserManager extends MultiFetchableManager<User, number, UserResolvable> {
 	isValidUsername(username: string, context: 'Signup'|'Unknown'|'UsernameChange', birthday?: Date): Promise<Interface.ValidUsername>
 	batchFetchAlias(userId: number): Promise<string>
-	batchFetchALias(userIds: number[]): Promise<Map<number, string>>
+	batchFetchAlias<userId extends UserResolvable>(userIds: userId[]): Promise<Map<userId, string>>
+	fromUsernames(username: string, forceUpdate?: boolean): Promise<User>
+	fromUsernames<name extends string>(usernames: name[], forceUpdate?: boolean): Promise<Map<name, User>>
 }
 
-export class UniverseManager extends MultiFetchableManager<UniversePartial, number, UniverseResolvable, Universe> {}
+export class UniverseManager extends MultiFetchableManager<UniversePartial, number, UniverseResolvable, Universe> {
+	fetchDevelop(universeId: UniverseResolvable): Promise<DevelopUniverse>
+	fetchDevelop<universeId extends UniverseResolvable>(universeIds: universeId[]): Promise<Map<universeId, DevelopUniverse>>
+}
 
 export class AssetManager extends MultiFetchableManager<AssetPartial, number, AssetResolvable, Asset> {}
 
@@ -859,7 +869,10 @@ export class GamepassManager extends MultiFetchableManager<GamepassPartial, numb
 
 export class GroupManager extends MultiFetchableManager<Group, number, GroupResolvable> {}
 
-export class OutfitManager extends FetchableManager<OutfitPartial, number, OutfitResolvable, Outfit> {}
+export class OutfitManager extends FetchableManager<OutfitPartial, number, OutfitResolvable, Outfit> {
+	fetchThumbnailUrls(outfitId: OutfitResolvable, size?: Enum.OutfitThumbnailSize): Promise<string>
+	fetchThumbnailUrls<outfitId extends OutfitResolvable>(outfitIds: outfitId[], size?: Enum.OutfitThumbnailSize): Promise<Map<outfitId, string>>
+}
 
 export class PlaceManager extends MultiFetchableManager<PlacePartial, number, PlaceResolvable, Place> {}
 
@@ -884,7 +897,7 @@ export class ChatManager extends Base {
 
 	getSettings(): Promise<Interface.ChatSettings>
 	getFeatureRollouts(featureName: string): Promise<boolean>
-	getFeatureRollouts(featureNames: string): Promise<Map<string, boolean>>
+	getFeatureRollouts<featureName extends string>(featureNames: featureName[]): Promise<Map<featureName, boolean>>
 	getMetadata(): Promise<Interface.Dictionary>
 	getUnreadConversationCount(): Promise<number>
 }
@@ -895,7 +908,7 @@ export class ChatMessageManager extends Base {
 	get(id: string, data?: Interface.Dictionary): MessagePartial
 	get(id: string, data: Interface.Dictionary, overrideClass: Constructor<MessagePartial>): typeof overrideClass.prototype
 	getLatest(conversation: ConversationResolvable, amount?: number): Promise<Collection<Interface.Dictionary[], string, Message[]>>
-	getLatest(conversations: ConversationResolvable[], amount?: number): Promise<Map<number, Collection<Interface.Dictionary[], string, Message[]>>>
+	getLatest<conversation extends ConversationResolvable>(conversations: conversation[], amount?: number): Promise<Map<conversation, Collection<Interface.Dictionary[], string, Message[]>>>
 }
 
 export class ConversationManager extends Base {
@@ -941,7 +954,7 @@ export class GroupConversation extends Conversation {
 	participants: GroupChatMember[]
 	type: Enum.ConversationType.MultiUserConversation
 	addMembers(users: UserResolvable): Promise<void>
-	addMembers(users: UserResolvable[]): Promise<Map<User, string>>
+	addMembers<users extends UserResolvable>(users: users[]): Promise<Map<users, string>>
 	removeMember(user: UserResolvable): Promise<void>
 	setName(name: string): Promise<Interface.ConversationTitle>
 }
@@ -1081,7 +1094,7 @@ export class FetchableManager<Class, Key=number, Resolvable=GenericResolvable, F
 
 export class MultiFetchableManager<Class, Key=number, Resolvable=GenericResolvable, FetchClass=Class> extends FetchableManager<Class, Key, Resolvable, FetchClass> {
 	fetch(id: Resolvable, forceUpdate?: boolean): Promise<FetchClass>
-	fetch(id: Resolvable[], forceUpdate?: boolean): Promise<Map<Key, FetchClass>>
+	fetch<id extends Resolvable>(id: id[], forceUpdate?: boolean): Promise<Map<id, FetchClass>>
 }
 
 export class SponsorManager extends BaseManager<SponsorshipPartial, number, SponsorResolvable> {
@@ -1169,7 +1182,7 @@ export class DataStore extends PlaceAPIManager {
 	increment(key: string, amount: number, userIds?: UserResolvable[], attributes?: Interface.Dictionary): Promise<DataStoreValue>
 	listVersions(key: string, startDate?: Date, endDate?: Date, maxPageSize?: number, sortOrder?: Enum.SortOrderLong): Promise<Page<DataStoreVersion,Interface.DataStoreVersionPageData>>
 	listKeys(prefix?: string, maxPageSize?: number): Promise<Page<string>>
-	getBulk(keys: string[]): Promise<Map<string, any>>
+	getBulk<key extends string>(keys: key[]): Promise<Map<key, any>>
 }
 
 export class LegacyDataStore extends PlaceAPIManager {
@@ -1184,7 +1197,7 @@ export class LegacyDataStore extends PlaceAPIManager {
 	remove(key: string): Promise<any>
 	increment(key: string, amount: number): Promise<number>
 	update(key: string, callback: (value: any) => any): Promise<any>
-	getBulk(keys: string[]): Promise<Map<string, any>>
+	getBulk<key extends string>(keys: key[]): Promise<Map<key, any>>
 }
 
 export class OrderedDataStore extends LegacyDataStore {
@@ -1220,7 +1233,7 @@ export class FFlagChannel extends MultiFetchableManager<FFlag, string, FFlagReso
 	get: undefined
 	from(fullName: string, value: string): FFlag
 	fetch(fullFlagName: string, doUpdate?: boolean, light?: boolean): Promise<FFlag>
-	fetch(fullFlagNames: string[], doUpdate?: boolean, light?: boolean): Promise<Map<string, FFlag>>
+	fetch<flagName extends string>(fullFlagNames: flagName[], doUpdate?: boolean, light?: boolean): Promise<Map<flagName, FFlag>>
 	fetchAllRaw(): Promise<{[flagName: string]: string}>
 	fetchAll(): Promise<Map<string, FFlag>>
 }

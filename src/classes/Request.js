@@ -42,8 +42,10 @@ export class BaseRequest extends Function {
 	 */
 	async _call(obj, url, params = {}, retry = params.retryLimit) {
 		const headers = new Headers(obj.client.headers)
-		for (let [name, value] of (params.headers instanceof Headers ? params.headers : Object.entries(params.headers ?? {}))) {
-			headers.set(name, value)
+		if (params.headers) {
+			for (let [name, value] of (params.headers instanceof Headers ? params.headers : Object.entries(params.headers))) {
+				headers.set(name, value)
+			}
 		}
 		params.headers = headers
 
@@ -70,7 +72,7 @@ export class BaseRequest extends Function {
 
 			if (retry == null || retry > 0) {
 				await sleep(retryAfter * 1000)
-				return this(url, params)
+				return this(url, params, retry)
 			}
 		} else if (res.status == 403 && res.headers.has('x-csrf-token')) {
 			if (obj.client.loggerEnabled && modes.retry[obj.client.loggerMode]) {
@@ -78,7 +80,7 @@ export class BaseRequest extends Function {
 			}
 
 			obj.client.headers.set('x-csrf-token', res.headers.get('x-csrf-token'))
-			return this(url, params)
+			return this(url, params, retry)
 		}
 		
 		const response = res instanceof RobloxResponse ? res : new RobloxResponse(res, await res.text(), params, url)

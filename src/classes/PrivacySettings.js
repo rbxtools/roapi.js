@@ -90,4 +90,30 @@ export class PrivacySettings extends UserAPIManagerAuthenticated {
 	async setPrivateMessagePrivacy(privacy) {
 		return this.set('private-message-privacy', 'privateMessagePrivacy', privacy)
 	}
+
+	/**
+	 * Gets the authenticated user's visibility privacy
+	 */
+	async getVisibility() {
+		return this.get('visibility-privacy', 'visibilityPrivacy')
+	}
+	/**
+	 * Sets the authenticated user's visibility privacy
+	 */
+	async setVisibility(privacy) {
+		return this.set('visibility-privacy', 'visibilityPrivacy', privacy)
+	}
+
+	/**
+	 * Gets the authenticated user's content restriction level
+	 */
+	async getContentRestrictions() {
+		return this.get('content-restriction', 'contentRestrictionLevel')
+	}
+	/**
+	 * Gets the authenticated user's content restriction level
+	 */
+	async setContentRestrictions(level) {
+		return this.set('content-restriction', 'contentRestrictionLevel', level)
+	}
 }

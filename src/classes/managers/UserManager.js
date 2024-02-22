@@ -55,6 +55,31 @@ export class UserManager extends MultiFetchableManager {
 		return returnOnly ? users.get(returnOnly) : users
 	}
 
+	async fromUsernames(usernames, forceUpdate = false) {
+		const returnOnly = !Array.isArray(usernames) && usernames
+		if (returnOnly) {
+			usernames = [usernames]
+		}
+		const users = new Map
+		usernames = usernames.map(resolvable => resolvable.toString()).filter(username => {
+			for (let cached of this.cache.values.values()) {
+				if (cached.name.toLowerCase() == username.toLowerCase()) {
+					users.set(username, cached)
+					return forceUpdate
+				}
+			}
+
+			return true
+		})
+		if (usernames.length > 0) {
+			const res = await this.client.request.users(`/v1/usernames/users`, {method: 'POST', body: {usernames, excludeBannedUsers: false}})
+			for (let userData of res.json.data) {
+				users.set(userData.requestedUsername, this.get(userData.id, userData))
+			}
+		}
+		return returnOnly ? users.get(returnOnly) : users
+	}
+
 	/**
 	 * Checks if the given username is valid.
 	 * @param {string} username

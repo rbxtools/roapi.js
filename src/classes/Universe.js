@@ -17,7 +17,7 @@ export class UniversePartial extends AssetLike {
 			data = camelCase(data)
 		}
 
-		this.rootPlaceId = data.rootPlace?.id ?? data.rootPlace ?? this.rootPlaceId
+		this.rootPlaceId = data.rootPlace?.id ?? data.rootPlaceId ?? data.rootPlace ?? this.rootPlaceId
 
 		return super._patch(data, true)
 	}
@@ -39,14 +39,14 @@ export class UniversePartial extends AssetLike {
 		return this.client.places.fetch(this.rootPlaceId, doUpdate)
 	}
 
-	fetchSettings() {
+	async fetchSettings() {
 		const res = await this.client.request.develop(`/v1/universes/${this.id}/configuration`)
 		this.name = res.json.name
 		this.universeAvatarType = res.json.universeAvatarType
 		return res.json
 	}
 
-	patchSettings(settings) {
+	async patchSettings(settings) {
 		const res = await this.client.request.develop(`/v2/universes/${this.id}/configuration`, {
 			method: 'PATCH',
 			body: settings
@@ -58,42 +58,22 @@ export class UniversePartial extends AssetLike {
 	}
 }
 
-export class Universe extends UniversePartial {
-	constructor(data, client) {
-		super({id: data.id, name: data.name}, client)
-		this._patch(data)
-	}
-
+export class DevelopUniverse extends UniversePartial {
 	_patch(data, skipCase = true) {
 		if (!skipCase) {
 			data = camelCase(data)
 		}
-
 		this.description = data.description ?? this.description
-		this.price = data.price ?? this.price
-		this.allowedGearGenres = data.allowedGearGenres ?? this.allowedGearGenres
-		this.isGenreEnforced = data.isGenreEnforced ?? this.isGenreEnforced
-		this.copyingAllowed = data.copyingAllowed ?? this.copyingAllowed
-		this.playing = data.playing ?? this.playing
-		this.visits = data.visits ?? this.visits
-		this.maxPlayers = data.maxPlayers ?? this.maxPlayers
+		this.isArchived = data.isArchived ?? this.isArchived
+		this.privacyType = data.privacyType ?? this.privacyType
+		this.creatorType = data.creatorType?.toLowerCase() ?? data.creator?.type?.toLowerCase() ?? this.creatorType ?? 'User'
+		this.creatorId = data.creatorTargetId ?? data.creatorId ?? data.creator?.id ?? this.creatorId
+		if (data.creatorName) {
+			const manager = this.creatorType == 'Group' ? this.client.groups : this.client.users
+			manager.get(this.creatorId, {name: data.creatorName, id: this.creatorId})
+		}
 		this.created = data.created ? new Date(data.created) : this.created
 		this.updated = data.updated ? new Date(data.updated) : this.updated
-		this.studioAccessToApis = data.studioAccessToApis ?? data.studioAccessToApisAllowed ?? this.studioAccessToApis
-		this.privateServersEnabled = data.privateServersEnabled ?? data.createVipServersAllowed ?? this.privateServersEnabled
-		this.universeAvatarType = data.universeAvatarType ?? this.universeAvatarType
-		this.genre = data.genre ?? this.genre
-		this.isAllGenre = data.isAllGenre ?? this.isAllGenre
-		this.isFavorited = data.isFavorited ?? data.isFavoriatedByUser ?? this.isFavorited
-		this.favoritedCount = data.favoritedCount ?? this.favoritedCount
-		
-		this.creatorType = data.creator?.type?.toLowerCase() ?? this.creatorType
-		this.creatorId = data.creator?.id ?? this.creatorId
-		this.rawCreator = data.creator ?? this.rawCreator
-		
-		/** @deprecated NYI to Roblox API - currently always null */
-		this.gameRating = data.gameRating
-
 		return super._patch(data, true)
 	}
 
@@ -104,7 +84,7 @@ export class Universe extends UniversePartial {
 			case 'group':
 				return this.client.groups.get(this.creatorId)
 			default:
-				return this.rawCreator
+				return this.rawCreator ?? {type: this.creatorType, id: this.creatorId, name: this.creatorName}
 		}
 	}
 
@@ -115,8 +95,40 @@ export class Universe extends UniversePartial {
 			case 'group':
 				return this.client.groups.fetch(this.creatorId, doUpdate)
 			default:
-				return this.rawCreator
+				return this.rawCreator ?? {type: this.creatorType, id: this.creatorId, name: this.creatorName}
 		}
+	}
+}
+
+export class Universe extends DevelopUniverse {
+	_patch(data, skipCase = true) {
+		if (!skipCase) {
+			data = camelCase(data)
+		}
+
+		this.price = data.price ?? this.price
+		this.allowedGearGenres = data.allowedGearGenres ?? this.allowedGearGenres
+		this.isGenreEnforced = data.isGenreEnforced ?? this.isGenreEnforced
+		this.copyingAllowed = data.copyingAllowed ?? this.copyingAllowed
+		this.playing = data.playing ?? this.playing
+		this.visits = data.visits ?? this.visits
+		this.maxPlayers = data.maxPlayers ?? this.maxPlayers
+		this.studioAccessToApis = data.studioAccessToApis ?? data.studioAccessToApisAllowed ?? this.studioAccessToApis
+		this.privateServersEnabled = data.privateServersEnabled ?? data.createVipServersAllowed ?? this.privateServersEnabled
+		this.universeAvatarType = data.universeAvatarType ?? this.universeAvatarType
+		this.genre = data.genre ?? this.genre
+		this.isAllGenre = data.isAllGenre ?? this.isAllGenre
+		this.isFavorited = data.isFavorited ?? data.isFavoriatedByUser ?? this.isFavorited
+		this.favoritedCount = data.favoritedCount ?? this.favoritedCount
+
+		data.creatorName ??= data.creator?.name
+		
+		this.rawCreator = data.creator ?? this.rawCreator
+		
+		/** @deprecated NYI to Roblox API - currently always null */
+		this.gameRating = data.gameRating
+
+		return super._patch(data, true)
 	}
 }
 
@@ -126,7 +138,7 @@ export class UniverseBadges extends UniverseAPIManager {
 		this.universe = universe
 	}
 
-	async getAll(options) {
+	getAll(options) {
 		return Page.first(`https://badges.roblox.com/v1/universes/${this.universe.id}/badges?limit=${options.limit ?? 25}&sortOrder=${options.order ?? 'Desc'}`, {mapFunc: badge => new Badge(badge, this.client)}, this.client)
 	}
 }

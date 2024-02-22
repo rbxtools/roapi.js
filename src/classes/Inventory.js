@@ -1,13 +1,13 @@
 import { resolvableId } from "../util.js";
 import {Badge} from "./Badge.js";
-import { OutfitPartial } from "./Outfit.js";
 import {Page} from "./ResponsePage.js";
 import { UserAPIManager } from "./managers/APIManager.js";
+import { OutfitPartial } from "./Outfit.js";
 
 export class Inventory extends UserAPIManager {
-	async getOutfits(options) {
+	async getOutfits(options = {}) {
 		const res = await this.client.request.avatar(`/v1/users/${this.user.id}/outfits?itemsPerPage=${options.count ?? 2000}&isEditable=${options.isEditable ?? ''}`)
-		return res.json.data.map(outfit => new OutfitPartial(outfit, this.client))
+		return res.json.data.map(outfit => this.client.outfits.get(outfit.id, outfit, OutfitPartial))
 	}
 
 	async getBadges(options) {
