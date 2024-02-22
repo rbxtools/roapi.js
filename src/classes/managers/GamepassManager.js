@@ -31,7 +31,7 @@ export class GamepassManager extends MultiFetchableManager {
 			return !(cached && !(cached instanceof Gamepass) && !forceUpdate)
 		})
 		if (gamepassIds.length > 0) {
-			const res = await this.client.request.catalog() // TODO: this monkey
+			const res = await this.client.request.catalog() // TODO
 			for (let passData of res.json.data) {
 				gamepasses.set(passData.id, this.get(passData.id, passData, Gamepass))
 			}

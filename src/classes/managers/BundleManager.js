@@ -1,5 +1,5 @@
-import { Cache } from "../Cache.js";
 import { Bundle, BundlePartial } from "../Bundle.js";
+import { Cache } from "../Cache.js";
 import { MultiFetchableManager } from "./BaseManager.js";
 
 /** @typedef {number | string | BundlePartial} BundleResolvable */
@@ -31,7 +31,7 @@ export class BundleManager extends MultiFetchableManager {
 			return !(cached && !(cached instanceof Bundle) && !forceUpdate)
 		})
 		if (bundleIds.length > 0) {
-			const res = await this.client.request.catalog() // TODO: this monkey
+			const res = await this.client.request.catalog() // TODO
 			for (let passData of res.json.data) {
 				bundles.set(passData.id, this.get(passData.id, passData, Bundle))
 			}

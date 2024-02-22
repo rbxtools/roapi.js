@@ -31,7 +31,7 @@ export class GroupManager extends MultiFetchableManager {
 			return !cached || forceUpdate
 		})
 		if (groups.length > 0) {
-			const res = await this.client.request.groups() // TODO: this monkey
+			const res = await this.client.request.groups() // TODO
 			for (let groupData of res.json.data) {
 				groups.set(groupData.id, this.get(groupData.id, groupData))
 			}

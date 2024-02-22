@@ -1,6 +1,6 @@
 import { AssetLike } from "../AssetLike.js";
 import { Place, PlacePartial } from "../Place.js";
-import { PrivateServer } from '../PrivateServer.js'
+import { PrivateServer } from '../PrivateServer.js';
 import { MultiFetchableManager } from "./BaseManager.js";
 
 /** @typedef {number | string | PrivateServer | PlacePartial} PlaceResolvable */
@@ -53,7 +53,7 @@ export class PlaceManager extends MultiFetchableManager {
 			return !(cached && !(cached instanceof Place) && !forceUpdate)
 		})
 		if (placeIds.length > 0) {
-			const res = await this.client.request.games() // TODO: this monkey
+			const res = await this.client.request.games() // TODO
 			for (let placeData of res.json.data) {
 				places.set(placeData.id, this.get(placeData.id, placeData, Place))
 			}
